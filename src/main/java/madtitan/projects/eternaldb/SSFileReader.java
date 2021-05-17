@@ -6,37 +6,31 @@ import java.util.Iterator;
 
 public class SSFileReader {
 
+  public static final String READ_MODE = "r";
   private final RandomAccessFile randomAccessFile;
   private final DataFileMetadata dataFileMetadata;
 
   public SSFileReader(final String filePath) throws IOException {
-    this.randomAccessFile = new RandomAccessFile(filePath, "r");
+    this.randomAccessFile = new RandomAccessFile(filePath, READ_MODE);
     this.dataFileMetadata = this.parseDataFileMetadata();
   }
 
   private DataFileMetadata parseDataFileMetadata() throws IOException {
-    var statsLocationStart = this.randomAccessFile.readInt();
-    var statsLocationLength = this.randomAccessFile.readInt();
-    var bloomFilterLocationStart = this.randomAccessFile.readInt();
-    var bloomFilterLength = this.randomAccessFile.readInt();
-    var keyValueLocationStart = this.randomAccessFile.readInt();
-    var keyValueLength = this.randomAccessFile.readInt();
+    var statsLocationStart = this.randomAccessFile.readLong();
+    var bloomFilterLocationStart = this.randomAccessFile.readLong();
+    var keyValueLocationStart = this.randomAccessFile.readLong();
 
     return DataFileMetadata.builder()
-        .withStatsLocationStart(statsLocationStart)
-        .withStatsLength(statsLocationLength)
-        .withBloomFilterLocationStart(bloomFilterLocationStart)
-        .withBloomFilterLength(bloomFilterLength)
-        .withKeyValueLocationStart(keyValueLocationStart)
-        .withKeyValueLength(keyValueLength)
-        .build();
+        .statsLocationStart(statsLocationStart)
+        .bloomFilterLocationStart(bloomFilterLocationStart)
+        .keyValueLocationStart(keyValueLocationStart).build();
   }
 
   public DataFileMetadata getDataFileMetadata() {
     return dataFileMetadata;
   }
 
-  public byte[] getValue(final int location) throws IOException {
+  public byte[] getValue(final long location) throws IOException {
     this.randomAccessFile.seek(location);
     final int valueLength = this.randomAccessFile.readInt();
     final byte[] value = new byte[valueLength];
@@ -45,7 +39,7 @@ public class SSFileReader {
   }
 
   public SSKeyValueIterator getIterator() throws IOException {
-    return new SSKeyValueIterator(this.dataFileMetadata.getKeyValueLocationStart(),
+    return new SSKeyValueIterator(this.dataFileMetadata.keyValueLocationStart(),
         this.randomAccessFile);
   }
 
@@ -66,10 +60,10 @@ public class SSFileReader {
 
   static final class SSKeyValueIterator implements Iterator<KeyValueLocation> {
 
-    private final int location;
+    private final long location;
     private final RandomAccessFile randomAccessFile;
 
-    public SSKeyValueIterator(final int location, final RandomAccessFile randomAccessFile)
+    public SSKeyValueIterator(final long location, final RandomAccessFile randomAccessFile)
         throws IOException {
       this.location = location;
       this.randomAccessFile = randomAccessFile;
@@ -91,10 +85,16 @@ public class SSFileReader {
 
     @Override
     public KeyValueLocation next() {
-      final int keyLength = this.randomAccessFile.readInt();
-      final byte[] key = new byte[keyLength];
-      final int valueLocation = this.randomAccessFile.readInt();
-      return KeyValueLocation.of(key, valueLocation);
+      final int keyLength;
+      try {
+        keyLength = this.randomAccessFile.readInt();
+        final byte[] key = new byte[keyLength];
+        final int valueLocation = this.randomAccessFile.readInt();
+        return KeyValueLocation.of(key, valueLocation);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+      return null;
     }
   }
 }

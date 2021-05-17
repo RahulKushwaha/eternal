@@ -1,5 +1,6 @@
 package madtitan.projects.eternaldb;
 
+import java.io.IOException;
 import java.util.HashMap;
 import madtitan.projects.eternaldb.SSFileReader.KeyValueLocation;
 import madtitan.projects.eternaldb.SSFileReader.SSKeyValueIterator;
@@ -9,7 +10,7 @@ public class SSTableMap implements Map<byte[], byte[]> {
   private final SSFileReader ssFileReader;
   private final HashMap<byte[], Integer> lookup;
 
-  public SSTableMap(final SSFileReader ssFileReader) {
+  public SSTableMap(final SSFileReader ssFileReader) throws IOException {
     this.ssFileReader = ssFileReader;
     this.lookup = new HashMap<>();
 

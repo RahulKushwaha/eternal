@@ -12,12 +12,9 @@ public class KeyValueStore implements Map<byte[], byte[]> {
 
   @Override
   public byte[] get(byte[] key) {
-    var iterator = this.lookupChain.iterator();
-    while (iterator.hasNext()) {
-      var map = iterator.next();
-      byte[] result;
-      while ((result = map.get(key)) != null) {
-        return result;
+    for (Map<byte[], byte[]> map : this.lookupChain) {
+      if ((map.get(key)) != null) {
+        return map.get(key);
       }
     }
 
@@ -26,11 +23,13 @@ public class KeyValueStore implements Map<byte[], byte[]> {
 
   @Override
   public byte[] put(byte[] key, byte[] value) {
+
     return this.lookupChain.get(0).put(key, value);
   }
 
   @Override
   public byte[] delete(byte[] key) {
+
     return new byte[0];
   }
 }

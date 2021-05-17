@@ -1,13 +1,14 @@
 package madtitan.projects.eternaldb;
 
-import java.util.HashMap;
+import com.google.common.primitives.SignedBytes;
+import java.util.TreeMap;
 
 public class InMemoryPrimaryMapImpl implements Map<byte[], byte[]> {
 
-  private final HashMap<byte[], byte[]> map;
+  private final TreeMap<byte[], byte[]> map;
 
   public InMemoryPrimaryMapImpl() {
-    this.map = new HashMap<>();
+    this.map = new TreeMap<>(SignedBytes.lexicographicalComparator());
   }
 
   @Override
