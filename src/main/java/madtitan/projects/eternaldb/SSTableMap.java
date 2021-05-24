@@ -2,7 +2,6 @@ package madtitan.projects.eternaldb;
 
 import java.io.IOException;
 import java.util.HashMap;
-import madtitan.projects.eternaldb.SSFileReader.KeyValueLocation;
 import madtitan.projects.eternaldb.SSFileReader.SSKeyValueIterator;
 
 public class SSTableMap implements Map<byte[], byte[]> {
@@ -27,8 +26,8 @@ public class SSTableMap implements Map<byte[], byte[]> {
   }
 
   @Override
-  public byte[] put(byte[] key, byte[] value) {
-    return new byte[0];
+  public void put(byte[] key, byte[] value) {
+
   }
 
   @Override
